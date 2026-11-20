@@ -1,0 +1,52 @@
+<header class="pagina-cabecalho sb-anim sb-anim--1">
+  <p class="olho">Cadastros</p>
+  <h1>Fornecedores</h1>
+  <p>Lista de quem abastece o acervo da SpringBook.</p>
+</header>
+
+@if (erro) {
+  <div class="erro" role="alert">{{ erro }}</div>
+}
+
+<div class="tabela-wrap sb-anim sb-anim--2">
+  <table mat-table [dataSource]="fornecedores" class="tabela">
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let f"><strong>{{ f.nome }}</strong></td>
+    </ng-container>
+
+    <ng-container matColumnDef="documento">
+      <th mat-header-cell *matHeaderCellDef>Documento</th>
+      <td mat-cell *matCellDef="let f">{{ f.documento }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="contato">
+      <th mat-header-cell *matHeaderCellDef>Contato</th>
+      <td mat-cell *matCellDef="let f">{{ contato(f) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="ativo">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let f">
+        <span class="badge" [class.badge--ok]="f.ativo" [class.badge--off]="!f.ativo">
+          {{ f.ativo ? 'Ativo' : 'Inativo' }}
+        </span>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+    <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+  </table>
+
+  @if (!carregando && fornecedores.length === 0) {
+    <div class="vazio">Nenhum fornecedor cadastrado ainda.</div>
+  }
+</div>
+
+<p class="dica sb-anim sb-anim--4">
+  @if (auth.isAdmin()) {
+    Você pode gerenciar estes cadastros.
+  } @else {
+    Use esta tela para consultar e cadastrar fornecedores.
+  }
+</p>

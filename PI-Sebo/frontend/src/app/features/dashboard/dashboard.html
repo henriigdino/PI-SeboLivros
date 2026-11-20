@@ -1,0 +1,55 @@
+<header class="pagina-cabecalho sb-anim sb-anim--1">
+  <p class="olho">Painel</p>
+  <h1 class="sb-anim sb-anim--2">Bom dia, {{ auth.usuario()?.nome ?? 'equipe' }}.</h1>
+  <p class="sb-anim sb-anim--3">Um resumo rápido do que já está disponível na SpringBook.</p>
+</header>
+
+<section class="cards">
+  <article class="card sb-anim sb-anim--2">
+    <span class="card-icone material-symbols-rounded">local_shipping</span>
+    <h3>Fornecedores</h3>
+    <p class="numero">{{ totalFornecedores ?? '—' }}</p>
+    <p>Cadastrados no sistema.</p>
+    <a routerLink="/fornecedores" class="link">Abrir módulo →</a>
+  </article>
+
+  <article class="card card--bronze sb-anim sb-anim--3">
+    <span class="card-icone material-symbols-rounded">category</span>
+    <h3>Categorias</h3>
+    <p class="numero">Em breve</p>
+    <p>Organização do acervo por gênero.</p>
+    <a routerLink="/categorias" class="link">Abrir módulo →</a>
+  </article>
+
+  <article class="card sb-anim sb-anim--4">
+    <span class="card-icone material-symbols-rounded">menu_book</span>
+    <h3>Livros</h3>
+    <p class="numero">Em breve</p>
+    <p>Cadastro, status e fotos do acervo.</p>
+    <a routerLink="/livros" class="link">Abrir módulo →</a>
+  </article>
+
+  <article class="card card--wine sb-anim sb-anim--5">
+    <span class="card-icone material-symbols-rounded">receipt_long</span>
+    <h3>Vendas</h3>
+    <p class="numero">Em breve</p>
+    <p>Registro de vendas e baixa do acervo.</p>
+    <a routerLink="/vendas" class="link">Abrir módulo →</a>
+  </article>
+</section>
+
+<section class="atalhos sb-anim sb-anim--6">
+  <h2>Atalhos rápidos</h2>
+  <div class="atalhos-lista">
+    <a routerLink="/fornecedores">
+      <span class="material-symbols-rounded">person_add</span>
+      <span><strong>Ver fornecedores</strong><small>Consultar a lista atualizada</small></span>
+    </a>
+    @if (auth.isAdmin()) {
+      <a routerLink="/usuarios">
+        <span class="material-symbols-rounded">manage_accounts</span>
+        <span><strong>Gerenciar usuários</strong><small>Acesso exclusivo de administrador</small></span>
+      </a>
+    }
+  </div>
+</section>

@@ -1,0 +1,57 @@
+<div class="login-page">
+  <section class="painel-marca sb-anim sb-anim--fade">
+    <div class="marca-topo sb-anim sb-anim--left">
+      <span class="marca-icone material-symbols-rounded">menu_book</span>
+      <div>
+        <h1>SpringBook</h1>
+        <p>Gestão de livraria</p>
+      </div>
+    </div>
+
+    <div class="marca-texto">
+      <h2 class="sb-anim sb-anim--2">Cada livro<br>encontra seu leitor.</h2>
+      <p class="sb-anim sb-anim--3">Acervo, fornecedores, clientes e vendas em um só lugar — com uma interface feita para quem convive com livros todos os dias.</p>
+    </div>
+
+    <div class="marca-pe sb-anim sb-anim--4">
+      <span class="material-symbols-rounded">auto_stories</span>
+      <span>Acervo bem cuidado, leitura bem vivida.</span>
+    </div>
+  </section>
+
+  <section class="painel-form">
+    <form class="cartao sb-anim sb-anim--pop sb-anim--2" (ngSubmit)="entrar()">
+      <span class="form-icone material-symbols-rounded sb-anim sb-anim--3">login</span>
+      <h2 class="sb-anim sb-anim--4">Bem-vindo de volta</h2>
+      <p class="subtitulo sb-anim sb-anim--4">Entre com sua conta para continuar.</p>
+
+      @if (erro) {
+        <div class="erro" role="alert">{{ erro }}</div>
+      }
+
+      <div class="campo sb-anim sb-anim--5">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="username"
+               placeholder="voce@sebo.com.br" [(ngModel)]="email" required>
+      </div>
+
+      <div class="campo sb-anim sb-anim--6">
+        <label for="senha">Senha</label>
+        <input id="senha" name="senha" type="password" autocomplete="current-password"
+               placeholder="••••••••" [(ngModel)]="senha" required>
+      </div>
+
+      <button class="btn btn--primary entrar sb-anim sb-anim--6" type="submit" [disabled]="carregando">
+        @if (carregando) {
+          <span class="material-symbols-rounded">progress_activity</span>
+          Entrando...
+        } @else {
+          <span class="material-symbols-rounded">arrow_forward</span>
+          Entrar
+        }
+      </button>
+
+      <p class="rodape sb-anim sb-anim--6">Acesso restrito à equipe da SpringBook.</p>
+    </form>
+  </section>
+</div>

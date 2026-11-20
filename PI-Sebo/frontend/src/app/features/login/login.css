@@ -1,0 +1,109 @@
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.painel-marca {
+  background: linear-gradient(155deg, #1e6b45 0%, #2f8f5b 58%, #56a878 100%);
+  color: #f7f2e8;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.painel-marca::after {
+  content: '';
+  position: absolute;
+  right: -90px;
+  bottom: -120px;
+  width: 320px;
+  height: 320px;
+  border: 1px solid rgba(247, 242, 232, 0.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 42px rgba(247, 242, 232, 0.04), 0 0 0 84px rgba(247, 242, 232, 0.03);
+}
+
+.marca-topo { display: flex; align-items: center; gap: 1rem; }
+.marca-topo h1 {
+  color: #f7f2e8;
+  font-family: var(--font-marca);
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+.marca-topo p { margin: 0; opacity: 0.8; font-size: 0.85rem; letter-spacing: 0.05em; }
+
+.marca-icone {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(247, 242, 232, 0.15);
+  font-size: 30px;
+}
+
+.marca-texto { margin: auto 0; position: relative; z-index: 1; }
+.marca-texto h2 { color: #f7f2e8; font-size: 2.9rem; line-height: 1.1; margin-bottom: 1rem; }
+.marca-texto p { max-width: 36ch; opacity: 0.86; font-size: 1rem; }
+
+.marca-pe {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  opacity: 0.8;
+  position: relative;
+  z-index: 1;
+}
+
+.painel-form {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.cartao {
+  width: min(420px, 100%);
+  background: var(--sebo-surface);
+  border: 1px solid var(--sebo-border);
+  border-radius: 18px;
+  padding: 2.5rem;
+  box-shadow: 0 24px 60px rgba(43, 39, 35, 0.08);
+}
+
+.form-icone {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #dff3e6;
+  color: var(--sebo-moss-dark);
+  margin-bottom: 1.25rem;
+}
+
+.cartao h2 { font-size: 1.7rem; margin-bottom: 0.2rem; }
+.subtitulo { color: var(--sebo-ink-soft); font-size: 0.9rem; margin-bottom: 1.75rem; }
+
+.entrar { width: 100%; margin-top: 0.5rem; }
+
+.rodape {
+  margin: 1.5rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--sebo-ink-soft);
+}
+
+@media (max-width: 860px) {
+  .login-page { grid-template-columns: 1fr; }
+  .painel-marca { padding: 2rem; }
+  .marca-texto h2 { font-size: 2rem; }
+  .marca-texto { margin: 2rem 0; }
+  .cartao { padding: 2rem; }
+}

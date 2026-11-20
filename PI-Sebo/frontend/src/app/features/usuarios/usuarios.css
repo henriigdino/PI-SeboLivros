@@ -1,0 +1,10 @@
+.pagina-cabecalho { margin-bottom: 1.75rem; }
+.olho {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sebo-wine);
+  margin-bottom: 0.4rem;
+}
+.pagina-cabecalho p:last-child { color: var(--sebo-ink-soft); }

@@ -1,0 +1,55 @@
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand sb-anim sb-anim--left" routerLink="/dashboard">
+      <span class="brand-mark material-symbols-rounded">menu_book</span>
+      <span class="brand-texto">
+        <strong>SpringBook</strong>
+        <small>Gestão de livraria</small>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Menu principal">
+      <p class="nav-titulo sb-anim sb-anim--1">Módulos</p>
+      @for (item of menuVisivel; track item.path) {
+        <a class="nav-item sb-anim" [style.animation-delay.ms]="180 + $index * 70"
+           [routerLink]="item.path" routerLinkActive="ativo">
+          <span class="material-symbols-rounded">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-pe sb-anim sb-anim--5">
+      <span class="material-symbols-rounded">auto_stories</span>
+      <span>Acervo bem cuidado,<br>leitura bem vivida.</span>
+    </div>
+  </aside>
+
+  <div class="area-principal">
+    <header class="topbar sb-anim sb-anim--fade sb-anim--2">
+      <div class="topbar-miolo">
+        <span class="topbar-titulo">Sistema de gestão</span>
+      </div>
+
+      <div class="topbar-acoes">
+        @if (auth.usuario(); as usuario) {
+          <div class="usuario">
+            <span class="avatar">{{ usuario.nome.charAt(0) }}</span>
+            <span class="usuario-dados">
+              <strong>{{ usuario.nome }}</strong>
+              <small>{{ usuario.tipo === 'ADMIN' ? 'Administrador' : 'Funcionário' }}</small>
+            </span>
+          </div>
+        }
+        <button class="btn btn--ghost" type="button" (click)="logout()">
+          <span class="material-symbols-rounded">logout</span>
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <main class="conteudo sb-anim sb-anim--3">
+      <router-outlet />
+    </main>
+  </div>
+</div>
