@@ -98,6 +98,7 @@ Sugestão inicial:
 - `AuthService` expõe `usuario`, `logado` e `isAdmin` (signals). Use para controle visual de permissão.
 - Rotas são de propriedade da Pessoa 1. Colegas entregam o componente e informam o caminho do arquivo; a Pessoa 1 troca o placeholder pela rota real.
 - Tokens visuais (cores, fontes, botões, badges, tabelas) estão em `src/styles.css` — não redefinir localmente.
+- **Toda a parte visual é de propriedade da Pessoa 1.** Colegas entregam apenas `.ts` + `.html` usando as classes globais: `.cards`, `.card`, `.btn`, `.badge`, `.campo`, `.tabela`, `.tabela-wrap`, `.vazio`, `.erro`, `.sb-anim--1..6`. Não criar nem editar `.css`, `styles.css`, `index.html`, `angular.json` nem `layout/`. Isso fica travado no `.github/CODEOWNERS`.
 
 ## 7. Decisões fixadas
 
