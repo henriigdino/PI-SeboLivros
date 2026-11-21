@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Banco H2 (gerado localmente em cada máquina) ###
+data/*.mv.db
+data/*.trace.db
