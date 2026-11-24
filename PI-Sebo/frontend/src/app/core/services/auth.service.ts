@@ -1,7 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../env/environment';
 import { LoginResponse } from '../models/models';
 
@@ -10,6 +10,7 @@ const CHAVE_USUARIO = 'sebo.usuario';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly _usuario = signal<LoginResponse | null>(this.restaurar());
+  private ultimaValidacao = 0;
 
   readonly usuario = this._usuario.asReadonly();
   readonly logado = computed(() => this._usuario() !== null);
@@ -20,6 +21,25 @@ export class AuthService {
     private readonly router: Router,
   ) {}
 
+  /** Confirma no backend que a sessao salva no navegador ainda e valida. */
+  validarSessao(force = false): Observable<boolean> {
+    if (!this.logado()) return of(false);
+    if (!force && Date.now() - this.ultimaValidacao < 60_000) return of(true);
+
+    return this.http.get<LoginResponse>(`${environment.apiUrl}/me`).pipe(
+      tap((usuario) => {
+        this._usuario.set(usuario);
+        sessionStorage.setItem(CHAVE_USUARIO, JSON.stringify(usuario));
+        this.ultimaValidacao = Date.now();
+      }),
+      map(() => true),
+      catchError(() => {
+        this.limparSemRedirecionar();
+        return of(false);
+      }),
+    );
+  }
+
   login(email: string, senha: string) {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/login`, { email, senha })
@@ -27,6 +47,7 @@ export class AuthService {
         tap((usuario) => {
           this._usuario.set(usuario);
           sessionStorage.setItem(CHAVE_USUARIO, JSON.stringify(usuario));
+          this.ultimaValidacao = Date.now();
         }),
       );
   }
@@ -37,9 +58,14 @@ export class AuthService {
 
   /** Limpa o estado local e volta para a tela de login. */
   limpar(): void {
+    this.limparSemRedirecionar();
+    void this.router.navigate(['/login']);
+  }
+
+  private limparSemRedirecionar(): void {
     this._usuario.set(null);
     sessionStorage.removeItem(CHAVE_USUARIO);
-    void this.router.navigate(['/login']);
+    this.ultimaValidacao = 0;
   }
 
   private restaurar(): LoginResponse | null {
@@ -47,7 +73,8 @@ export class AuthService {
       const bruto = sessionStorage.getItem(CHAVE_USUARIO);
       if (!bruto) return null;
       const dados: unknown = JSON.parse(bruto);
-      if (typeof dados === 'object' && dados !== null && 'tipo' in dados) {
+      if (typeof dados === 'object' && dados !== null
+          && 'id' in dados && 'email' in dados && 'tipo' in dados) {
         return dados as LoginResponse;
       }
       return null;

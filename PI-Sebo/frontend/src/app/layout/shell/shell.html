@@ -1,6 +1,6 @@
 <div class="shell">
-  <aside class="sidebar">
-    <a class="brand sb-anim sb-anim--left" routerLink="/dashboard">
+  <header class="topbar sb-anim sb-anim--fade sb-anim--2">
+    <a class="brand" routerLink="/dashboard" title="Voltar ao painel">
       <span class="brand-mark material-symbols-rounded">menu_book</span>
       <span class="brand-texto">
         <strong>SpringBook</strong>
@@ -8,48 +8,55 @@
       </span>
     </a>
 
-    <nav class="nav" aria-label="Menu principal">
-      <p class="nav-titulo sb-anim sb-anim--1">Módulos</p>
-      @for (item of menuVisivel; track item.path) {
-        <a class="nav-item sb-anim" [style.animation-delay.ms]="180 + $index * 70"
-           [routerLink]="item.path" routerLinkActive="ativo">
-          <span class="material-symbols-rounded">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
-        </a>
-      }
-    </nav>
+    <div class="topbar-acoes">
+      @if (auth.usuario(); as usuario) {
+        <button class="usuario" type="button" (click)="alternarMenu()"
+                [attr.aria-expanded]="menuPerfilAberto" aria-label="Abrir menu do perfil">
+          <span class="avatar">{{ usuario.nome.charAt(0) }}</span>
+          <span class="usuario-dados">
+            <strong>{{ usuario.nome }}</strong>
+            <small [class.perfil-texto--admin]="auth.isAdmin()"
+                   [class.perfil-texto--funcionario]="!auth.isAdmin()">
+              {{ auth.isAdmin() ? 'Administrador' : 'Funcionário' }}
+            </small>
+          </span>
+          <span class="material-symbols-rounded seta" [class.seta--aberta]="menuPerfilAberto">expand_more</span>
+        </button>
 
-    <div class="sidebar-pe sb-anim sb-anim--5">
-      <span class="material-symbols-rounded">auto_stories</span>
-      <span>Acervo bem cuidado,<br>leitura bem vivida.</span>
-    </div>
-  </aside>
+        @if (menuPerfilAberto) {
+          <div class="menu-overlay" (click)="fecharMenu()" aria-hidden="true"></div>
 
-  <div class="area-principal">
-    <header class="topbar sb-anim sb-anim--fade sb-anim--2">
-      <div class="topbar-miolo">
-        <span class="topbar-titulo">Sistema de gestão</span>
-      </div>
+          <div class="menu-perfil" role="menu" aria-label="Perfil do usuário">
+            <div class="menu-cabecalho">
+              <span class="avatar avatar--grande">{{ usuario.nome.charAt(0) }}</span>
+              <div class="menu-identificacao">
+                <strong>{{ usuario.nome }}</strong>
+                <small>{{ usuario.email }}</small>
+                <span class="perfil-badge" [class.perfil-badge--admin]="auth.isAdmin()"
+                      [class.perfil-badge--funcionario]="!auth.isAdmin()">
+                  Logado como {{ auth.isAdmin() ? 'ADMIN' : 'FUNCIONÁRIO' }}
+                </span>
+              </div>
+            </div>
 
-      <div class="topbar-acoes">
-        @if (auth.usuario(); as usuario) {
-          <div class="usuario">
-            <span class="avatar">{{ usuario.nome.charAt(0) }}</span>
-            <span class="usuario-dados">
-              <strong>{{ usuario.nome }}</strong>
-              <small>{{ usuario.tipo === 'ADMIN' ? 'Administrador' : 'Funcionário' }}</small>
-            </span>
+            @if (auth.isAdmin()) {
+              <a class="btn btn--primary menu-item" routerLink="/usuarios" (click)="fecharMenu()" role="menuitem">
+                <span class="material-symbols-rounded">manage_accounts</span>
+                Administração de usuários
+              </a>
+            }
+
+            <button class="btn btn--sair menu-item" type="button" (click)="logout()" role="menuitem">
+              <span class="material-symbols-rounded">logout</span>
+              Sair
+            </button>
           </div>
         }
-        <button class="btn btn--ghost" type="button" (click)="logout()">
-          <span class="material-symbols-rounded">logout</span>
-          Sair
-        </button>
-      </div>
-    </header>
+      }
+    </div>
+  </header>
 
-    <main class="conteudo sb-anim sb-anim--3">
-      <router-outlet />
-    </main>
-  </div>
+  <main class="conteudo sb-anim sb-anim--3">
+    <router-outlet />
+  </main>
 </div>

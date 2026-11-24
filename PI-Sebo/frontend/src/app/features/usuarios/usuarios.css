@@ -8,3 +8,29 @@
   margin-bottom: 0.4rem;
 }
 .pagina-cabecalho p:last-child { color: var(--sebo-ink-soft); }
+
+.aviso-sucesso { margin: 0 0 1rem; }
+
+.carregando-texto {
+  margin-left: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sebo-moss);
+}
+
+.acoes-form,
+.acoes-tabela {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* O espaçamento vem de styles.css (secao-lista, lista-cabecalho,
+   td .btn + .btn e form .btn + .btn). */
+.acoes-form { gap: 0; }
+.acoes-tabela { position: relative; min-height: 42px; }
+.acoes-tabela .btn {
+  min-height: 34px;
+  padding: 0 0.85rem;
+  font-size: 0.82rem;
+}

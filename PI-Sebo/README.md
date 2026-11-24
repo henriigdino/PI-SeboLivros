@@ -19,16 +19,25 @@ O backend permanece em `C:\Users\henri\Downloads\livros\livros`.
 Veja o `README.md` dentro de `frontend/`. Resumo:
 
 ```powershell
-# Terminal 1 — backend
-cd C:\Users\henri\Downloads\livros\livros
+# Terminal 1 — backend (na raiz do grupo)
+cd livros
 .\mvnw spring-boot:run
 
 # Terminal 2 — frontend
-cd C:\Users\henri\Downloads\livros\PI-Sebo\frontend
+cd PI-Sebo\frontend
 npm start
 ```
 
 Abra `http://localhost:4200`.
+
+## Login inicial
+
+Com o banco vazio, o backend cria automaticamente um ADMIN:
+
+- E-mail: `admin@sebolivros.com`
+- Senha: `admin123`
+
+As credenciais vêm de `livros/src/main/resources/application.properties` (`sebo.seed.admin.*`). O seed só atua quando não existe nenhum ADMIN ativo e é desabilitado no perfil `prod`.
 
 ## Divisão de trabalho
 

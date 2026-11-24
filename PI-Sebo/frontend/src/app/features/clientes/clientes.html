@@ -1,0 +1,153 @@
+<header class="pagina-cabecalho sb-anim sb-anim--1">
+  <p>Cadastros</p>
+  <h1>Clientes</h1>
+  <p>Gerencie clientes pessoa física e jurídica, documentos e endereços.</p>
+</header>
+
+@if (erro) { <div class="erro" role="alert">{{ erro }}</div> }
+@if (sucesso) { <p role="status"><span class="badge badge--ok">{{ sucesso }}</span></p> }
+
+@if (auth.isAdmin()) {
+  <section class="card sb-anim sb-anim--2">
+    <h2>{{ editandoId === null ? 'Cadastrar cliente' : 'Editar cliente' }}</h2>
+    <p>Campos marcados com * são obrigatórios. Nome, documento, RG (quando informado), e-mail, telefone e endereço não podem se repetir.</p>
+    <form (ngSubmit)="salvar()" #formCliente="ngForm">
+      <div class="cards">
+        <div class="campo">
+          <label for="cliente-nome">Nome / razão social *</label>
+          <input id="cliente-nome" name="nome" [(ngModel)]="formulario.nome" required maxlength="150" placeholder="Nome do cliente" />
+        </div>
+        <div class="campo">
+          <label for="cliente-tipo">Tipo de pessoa *</label>
+          <select id="cliente-tipo" name="tipoPessoa" [(ngModel)]="formulario.tipoPessoa" (ngModelChange)="alterarTipo()">
+            <option value="FISICA">Pessoa física</option>
+            <option value="JURIDICA">Pessoa jurídica</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="cliente-documento">{{ formulario.tipoPessoa === 'FISICA' ? 'CPF *' : 'CNPJ *' }}</label>
+          <input id="cliente-documento" name="documento" [(ngModel)]="formulario.documento"
+                 (input)="mascararDocumento($event)"
+                 required maxlength="20" placeholder="Digite o documento" />
+        </div>
+        @if (formulario.tipoPessoa === 'FISICA') {
+          <div class="campo">
+            <label for="cliente-rg">RG (opcional)</label>
+            <input id="cliente-rg" name="rg" [(ngModel)]="formulario.rg" maxlength="20" placeholder="RG" />
+          </div>
+        } @if (ufsComIe.includes(formulario.uf)) {
+          <div class="campo">
+            <label for="cliente-ie">Inscrição estadual (opcional)</label>
+            <input id="cliente-ie" name="inscricaoEstadual" [(ngModel)]="formulario.inscricaoEstadual"
+                   maxlength="20" placeholder="Número ou ISENTO" />
+          </div>
+        }
+        <div class="campo">
+          <label for="cliente-email">E-mail</label>
+          <input id="cliente-email" name="email" [(ngModel)]="formulario.email" type="email"
+                 maxlength="150" placeholder="contato@exemplo.com" />
+        </div>
+        <div class="campo">
+          <label for="cliente-telefone">Telefone</label>
+          <input id="cliente-telefone" name="telefone" [(ngModel)]="formulario.telefone"
+                 maxlength="11" placeholder="11999999999" />
+        </div>
+        <div class="campo">
+          <label for="cliente-cep">CEP</label>
+          <div class="cep-linha">
+            <input id="cliente-cep" name="cep" [(ngModel)]="formulario.cep" (input)="mascararCep($event)"
+                   maxlength="9" placeholder="00000-000" />
+            <button type="button" class="btn btn--ghost" (click)="consultarCep()" [disabled]="consultandoCep">
+              Buscar CEP
+            </button>
+          </div>
+          @if (avisoEndereco) { <small class="aviso-endereco">{{ avisoEndereco }}</small> }
+        </div>
+        <div class="campo">
+          <label for="cliente-logradouro">Logradouro</label>
+          <input id="cliente-logradouro" name="logradouro" [(ngModel)]="formulario.logradouro" maxlength="150" />
+        </div>
+        <div class="campo">
+          <label for="cliente-numero">Número</label>
+          <input id="cliente-numero" name="numero" [(ngModel)]="formulario.numero" maxlength="20" />
+        </div>
+        <div class="campo">
+          <label for="cliente-complemento">Complemento</label>
+          <input id="cliente-complemento" name="complemento" [(ngModel)]="formulario.complemento" maxlength="100" />
+        </div>
+        <div class="campo">
+          <label for="cliente-bairro">Bairro</label>
+          <input id="cliente-bairro" name="bairro" [(ngModel)]="formulario.bairro" maxlength="100" />
+        </div>
+        <div class="campo">
+          <label for="cliente-cidade">Cidade</label>
+          <input id="cliente-cidade" name="cidade" [(ngModel)]="formulario.cidade" maxlength="100" />
+        </div>
+        <div class="campo">
+          <label for="cliente-uf">UF</label>
+          <select id="cliente-uf" name="uf" [(ngModel)]="formulario.uf" (ngModelChange)="alterarUf()">
+            <option value="">Selecione</option>
+            @for (uf of ufs; track uf) {
+              <option [value]="uf">{{ uf }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn--primary" [disabled]="salvando || !formCliente.valid">
+        Salvar
+      </button>
+      @if (editandoId !== null) {
+        <button type="button" class="btn btn--ghost" (click)="cancelar()" [disabled]="salvando">Cancelar edição</button>
+      }
+    </form>
+  </section>
+}
+
+<section class="secao-lista sb-anim sb-anim--3">
+  <div class="lista-cabecalho">
+    <h2>Clientes cadastrados</h2>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" type="button" (click)="carregar()" [disabled]="carregando">
+        Atualizar lista
+      </button>
+    }
+  </div>
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr><th>NOME</th><th>TIPO</th><th>DOCUMENTO</th><th>CONTATO</th><th>AÇÕES</th></tr>
+      </thead>
+      <tbody>
+        @for (cliente of clientes; track cliente.id) {
+          <tr>
+            <td><strong>{{ cliente.nome }}</strong></td>
+            <td>{{ cliente.tipoPessoa === 'FISICA' ? 'Pessoa física' : 'Pessoa jurídica' }}</td>
+            <td>{{ cliente.documento }}</td>
+            <td>{{ cliente.email || cliente.telefone || '—' }}</td>
+            <td>
+              @if (auth.isAdmin()) {
+                <button type="button" class="btn btn--ghost" (click)="editar(cliente)">Editar</button>
+                <button type="button" class="btn btn--danger" (click)="pedirDesativar(cliente)"
+                        [disabled]="excluindoId !== null">Desativar</button>
+              } @else {
+                Consulta
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (!carregando && clientes.length === 0) { <div class="vazio">Nenhum cliente ativo cadastrado.</div> }
+  </div>
+</section>
+
+@if (confirmacaoDesativar; as cliente) {
+  <app-confirm-dialog
+    titulo="Desativar cliente"
+    [mensagem]="'Deseja desativar ' + cliente.nome + '? O histórico de vendas será preservado.'"
+    confirmarTexto="Desativar"
+    [perigo]="true"
+    [processando]="excluindoId !== null"
+    (confirmado)="confirmarDesativar()"
+    (cancelado)="cancelarDesativar()" />
+}

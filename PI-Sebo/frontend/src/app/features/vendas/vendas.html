@@ -1,0 +1,141 @@
+<header class="pagina-cabecalho sb-anim sb-anim--1">
+  <p>Operacoes</p>
+  <h1>Vendas</h1>
+  <p>Registre a venda de um exemplar por vez, reembolse quando necessario e acompanhe o historico.</p>
+</header>
+
+@if (erro) { <div class="erro" role="alert">{{ erro }}</div> }
+@if (sucesso) { <p role="status"><span class="badge badge--ok">{{ sucesso }}</span></p> }
+
+@if (auth.isAdmin()) {
+  <section class="card sb-anim sb-anim--2">
+    <h2>Registrar venda</h2>
+    <p>Use um livro disponível. A confirmação acontece dentro do sistema, sem diálogo do navegador.</p>
+    <form (ngSubmit)="registrar()" #formVenda="ngForm">
+      <div class="cards">
+        <div class="campo">
+          <label for="venda-cliente">Cliente *</label>
+          <select id="venda-cliente" name="cliente" [(ngModel)]="clienteId" required>
+            <option [ngValue]="null">Selecione um cliente ativo</option>
+            @for (cliente of clientes; track cliente.id) {
+              <option [ngValue]="cliente.id">{{ cliente.nome }} (#{{ cliente.id }})</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label for="venda-livro">Livro disponível *</label>
+          <select id="venda-livro" name="livro" [(ngModel)]="livroId" required>
+            <option [ngValue]="null">Selecione um exemplar</option>
+            @for (livro of livros; track livro.id) {
+              <option [ngValue]="livro.id">{{ livro.titulo }} — {{ formatarPreco(livro.preco) }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="venda-forma">Forma de pagamento *</label>
+        <select id="venda-forma" name="formaPagamento" [(ngModel)]="formaPagamento" required>
+          @for (forma of formasPagamento; track forma) {
+            <option [ngValue]="forma">{{ rotuloFormaPagamento(forma) }}</option>
+          }
+        </select>
+      </div>
+
+      @if (livroSelecionado(); as livro) {
+        <p><strong>Valor da venda:</strong> {{ formatarPreco(livro.preco) }}</p>
+      }
+      @if (!carregando && clientes.length === 0) { <p>Nenhum cliente ativo encontrado. Cadastre um em Clientes.</p> }
+      @if (!carregando && livros.length === 0) { <p>Nenhum livro disponível encontrado. Cadastre um livro de teste.</p> }
+      <button type="submit" class="btn btn--primary"
+              [disabled]="carregando || salvando || !formVenda.valid || !clienteId || !livroId">
+        Confirmar venda
+      </button>
+    </form>
+  </section>
+}
+
+@if (auth.isAdmin() && vendaEmReembolso; as venda) {
+  <section class="card card--wine sb-anim sb-anim--pop">
+    <h2>Reembolsar venda #{{ venda.id }}</h2>
+    <p>
+      <strong>{{ venda.clienteNome || ('Cliente #' + venda.clienteId) }}</strong>
+      — {{ venda.livroTitulo || ('Livro #' + venda.livroId) }}
+      — {{ formatarPreco(venda.valor) }}
+    </p>
+    <div class="campo">
+      <label for="reembolso-motivo">Motivo do reembolso (opcional)</label>
+      <textarea id="reembolso-motivo" name="motivoReembolso" [(ngModel)]="motivoReembolso"
+                maxlength="300" rows="2" placeholder="Ex.: cliente desistiu da compra"></textarea>
+    </div>
+    <button type="button" class="btn btn--danger" (click)="confirmarReembolso()"
+            [disabled]="reembolsando">
+      Confirmar reembolso
+    </button>
+    <button type="button" class="btn btn--ghost" (click)="cancelarReembolso()"
+            [disabled]="reembolsando">
+      Cancelar
+    </button>
+  </section>
+}
+
+<section class="secao-lista sb-anim sb-anim--3">
+  <div class="lista-cabecalho">
+    <h2>Histórico de vendas</h2>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" type="button" (click)="carregar()" [disabled]="carregando || salvando || reembolsando">
+        Atualizar lista
+      </button>
+    }
+  </div>
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead><tr><th>ID</th><th>DATA</th><th>CLIENTE</th><th>LIVRO</th><th>VALOR</th><th>PAGAMENTO</th><th>STATUS</th><th>AÇÕES</th></tr></thead>
+      <tbody>
+        @for (venda of vendas; track venda.id) {
+          <tr>
+            <td>#{{ venda.id }}</td>
+            <td>{{ formatarData(venda.data) }}</td>
+            <td>{{ venda.clienteNome || ('Cliente #' + venda.clienteId) }}</td>
+            <td>{{ venda.livroTitulo || ('Livro #' + venda.livroId) }}</td>
+            <td>{{ formatarPreco(venda.valor) }}</td>
+            <td>{{ rotuloFormaPagamento(venda.formaPagamento) }}</td>
+            <td>
+              <span class="badge" [class.badge--ok]="venda.status === 'REALIZADA'"
+                    [class.badge--off]="venda.status === 'REEMBOLSADA'">
+                {{ venda.status }}
+              </span>
+              @if (venda.status === 'REEMBOLSADA') {
+                <div><small>{{ formatarData(venda.dataReembolso) }}</small></div>
+                @if (venda.motivoReembolso) {
+                  <div><small>{{ venda.motivoReembolso }}</small></div>
+                }
+              }
+            </td>
+            <td>
+              @if (auth.isAdmin() && venda.status === 'REALIZADA') {
+                <button type="button" class="btn btn--danger" (click)="iniciarReembolso(venda)"
+                        [disabled]="reembolsando">
+                  Reembolsar
+                </button>
+              } @else {
+                —
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (!carregando && vendas.length === 0) { <div class="vazio">Nenhuma venda registrada.</div> }
+  </div>
+</section>
+
+@if (confirmacaoVenda; as confirmacao) {
+  <app-confirm-dialog
+    titulo="Confirmar venda"
+    [mensagem]="'Confirmar a venda de ' + confirmacao.livro.titulo + ' para ' + confirmacao.cliente.nome + '? O exemplar passará para VENDIDO.'"
+    confirmarTexto="Confirmar venda"
+    [processando]="salvando"
+    (confirmado)="confirmarVenda()"
+    (cancelado)="cancelarVenda()" />
+}

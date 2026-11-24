@@ -41,7 +41,6 @@ export interface Categoria {
 }
 
 /**
- * Contrato reservado para a Pessoa 3.
  * A foto é servida por GET /api/livros/{id}/foto (BLOB no H2), não vem no JSON.
  */
 export interface Livro {
@@ -56,9 +55,10 @@ export interface Livro {
   preco: number;
   status: string;
   ativo: boolean;
+  possuiHistoricoVendas?: boolean;
 }
 
-/** Contrato reservado para a Pessoa 3. */
+/** Cliente pessoa física ou jurídica, com documento validado no backend. */
 export interface Cliente {
   id: number;
   nome: string;
@@ -78,8 +78,7 @@ export interface Cliente {
 }
 
 /**
- * Contrato reservado para a Pessoa 3.
- * Modelo sugerido: um livro por venda (decisão final ainda pendente).
+ * Um exemplar por venda, com histórico de reembolsos (REALIZADA → REEMBOLSADA).
  */
 export interface Venda {
   id: number;
@@ -87,5 +86,8 @@ export interface Venda {
   clienteId: number;
   livroId: number;
   valor: number;
+  formaPagamento: string;
   status: string;
+  dataReembolso?: string | null;
+  motivoReembolso?: string | null;
 }

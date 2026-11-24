@@ -1,0 +1,84 @@
+<header class="pagina-cabecalho sb-anim sb-anim--1">
+  <p>Cadastros</p>
+  <h1>Categorias</h1>
+  <p>Organize o acervo por gênero e mantenha os livros vinculados às suas categorias.</p>
+</header>
+
+@if (erro) { <div class="erro" role="alert">{{ erro }}</div> }
+@if (sucesso) { <p role="status"><span class="badge badge--ok">{{ sucesso }}</span></p> }
+
+@if (auth.isAdmin()) {
+  <section class="card sb-anim sb-anim--2">
+    <h2>{{ editandoId === null ? 'Cadastrar categoria' : 'Editar categoria' }}</h2>
+    <p>O nome é obrigatório e não pode se repetir.</p>
+    <form (ngSubmit)="salvar()" #formCategoria="ngForm">
+      <div class="cards">
+        <div class="campo">
+          <label for="categoria-nome">Nome *</label>
+          <input id="categoria-nome" name="nome" [(ngModel)]="formulario.nome"
+                 required maxlength="100" placeholder="Ex.: Literatura brasileira" />
+        </div>
+        <div class="campo">
+          <label for="categoria-descricao">Descrição</label>
+          <input id="categoria-descricao" name="descricao" [(ngModel)]="formulario.descricao"
+                 maxlength="500" placeholder="Detalhes opcionais sobre a categoria" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn--primary" [disabled]="salvando || !formCategoria.valid">
+        Salvar
+      </button>
+      @if (editandoId !== null) {
+        <button type="button" class="btn btn--ghost" (click)="cancelar()" [disabled]="salvando">
+          Cancelar edição
+        </button>
+      }
+    </form>
+  </section>
+}
+
+<section class="secao-lista sb-anim sb-anim--3">
+  <div class="lista-cabecalho">
+    <h2>Categorias cadastradas</h2>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" type="button" (click)="carregar()" [disabled]="carregando">
+        Atualizar lista
+      </button>
+    }
+  </div>
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr><th>NOME</th><th>DESCRIÇÃO</th><th>AÇÕES</th></tr>
+      </thead>
+      <tbody>
+        @for (categoria of categorias; track categoria.id) {
+          <tr>
+            <td><strong>{{ categoria.nome }}</strong></td>
+            <td>{{ categoria.descricao || '—' }}</td>
+            <td>
+              @if (auth.isAdmin()) {
+                <button type="button" class="btn btn--ghost" (click)="editar(categoria)">Editar</button>
+                <button type="button" class="btn btn--danger" (click)="pedirExclusao(categoria)"
+                        [disabled]="excluindoId !== null">Excluir</button>
+              } @else {
+                Consulta
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (!carregando && categorias.length === 0) { <div class="vazio">Nenhuma categoria cadastrada ainda.</div> }
+  </div>
+</section>
+
+@if (confirmacaoExclusao; as categoria) {
+  <app-confirm-dialog
+    titulo="Excluir categoria"
+    [mensagem]="'Deseja excluir a categoria ' + categoria.nome + '? Ela não poderá ser usada em novos livros.'"
+    confirmarTexto="Excluir"
+    [perigo]="true"
+    [processando]="excluindoId !== null"
+    (confirmado)="confirmarExclusao()"
+    (cancelado)="cancelarExclusao()" />
+}

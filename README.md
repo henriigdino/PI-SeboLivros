@@ -1,39 +1,45 @@
 # PI Sebo Livros
 
-Projeto Spring Boot + H2. O repositório contém **somente o código**: cada pessoa
-que clonar gera o **próprio banco local** na primeira execução. Isso evita o
-bloqueio do arquivo `.mv.db` e conflitos binários no Git.
+Projeto Spring Boot + H2 (backend em `livros/`) e Angular (frontend em `PI-Sebo/frontend/`).
 
-## Como começar (qualquer máquina)
+O repositório contém **somente o código**: cada pessoa gera o **próprio banco local** na primeira execução. Isso evita travamento do `.mv.db` e conflitos binários no Git.
 
-Requisito: **Java 21**.
+## Como começar
+
+Requisitos: **Java 21** e **Node.js** (para o frontend).
+
+### Backend
 
 ```powershell
-git clone https://github.com/henriigdino/PI-SeboLivros.git
 cd PI-SeboLivros/livros
 .\mvnw.cmd spring-boot:run
 ```
 
-No Linux/macOS:
+API: `http://localhost:8080`
 
-```bash
-./mvnw spring-boot:run
+### Frontend
+
+```powershell
+cd PI-SeboLivros/PI-Sebo/frontend
+npm install
+npm start
 ```
 
-A aplicação sobe em `http://localhost:8080`.
+Aplicação: `http://localhost:4200`
 
 ## Login inicial
 
 | E-mail | Senha |
 | --- | --- |
-| `admin@sebo.com` | `admin123` |
+| `admin@sebolivros.com` | `admin123` |
 
-Esse usuário é criado por `src/main/resources/data.sql` na primeira execução.
+O usuário é criado automaticamente pelo `DataSeeder` quando o banco está vazio.
+Ele é desabilitado em produção (`application-prod.properties`) e nos testes.
 Troque a senha depois de entrar.
 
 ## Console do H2
 
-1. Entre na aplicação com o usuário `admin` acima (o console exige `ROLE_ADMIN`).
+1. Entre na aplicação com o usuário administrador acima (o console exige `ROLE_ADMIN`).
 2. Acesse `http://localhost:8080/h2-console`.
 3. Use:
    - **JDBC URL:** `jdbc:h2:file:./data/sebo_db`
@@ -42,30 +48,23 @@ Troque a senha depois de entrar.
 
 ## Banco de dados
 
-- O arquivo fica em `livros/data/sebo_db.mv.db` e **não deve ser commitado**
-  (já está no `.gitignore`).
-- Ao rodar, o Hibernate cria/atualiza as tabelas e o `data.sql` insere apenas
-  os registros iniciais que ainda não existem.
-- Para “resetar” seu banco local: pare a aplicação, apague
-  `data/sebo_db.mv.db` e rode novamente. Ele será recriado a partir do `data.sql`.
-- Para compartilhar mudanças de estrutura ou dados de teste com o time, edite
-  as entidades ou o `data.sql` e commite — não commite o `.mv.db`.
+- O arquivo fica em `livros/data/sebo_db.mv.db` e **não deve ser commitado** (já está no `.gitignore`).
+- Para “resetar” seu banco local: pare a aplicação, apague `data/sebo_db.mv.db` e rode novamente. O administrador será recriado.
+- Para compartilhar mudanças de estrutura/dados com o time, commite o código (entidades, `DataSeeder`, migrações), nunca o `.mv.db`.
 
 ## Opcional: banco compartilhado via rede
 
-Se o time quiser um único banco acessível por várias máquinas, suba um servidor
-H2 TCP em uma máquina:
+Se o time quiser um único banco acessível por várias máquinas, suba um servidor H2 TCP:
 
 ```powershell
 java -cp "~/.m2/repository/com/h2database/h2/2.4.240/h2-2.4.240.jar" org.h2.tools.Server -tcp -tcpAllowOthers
 ```
 
-E rode a aplicação apontando para ele:
+E rode o backend apontando para ele:
 
 ```powershell
 $env:SEBO_DB_URL = 'jdbc:h2:tcp://IP_DA_MAQUINA:9092/./data/sebo_db'
 .\mvnw.cmd spring-boot:run
 ```
 
-Use apenas em rede confiável (a porta 9092 precisa estar liberada) e defina uma
-senha no banco antes de expor o H2.
+Use apenas em rede confiável (porta 9092 liberada) e defina senha no banco antes de expor o H2.

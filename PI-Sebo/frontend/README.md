@@ -11,7 +11,7 @@ Fundação visual da SpringBook: login, layout, menu por perfil, dashboard e int
 ## Instalação e execução
 
 ```powershell
-cd C:\Users\henri\Downloads\livros\PI-Sebo\frontend
+cd PI-Sebo\frontend
 npm install
 npm start
 ```

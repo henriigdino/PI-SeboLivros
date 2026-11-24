@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -12,6 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class Login {
   private readonly auth = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
 
   email = '';
@@ -20,6 +22,7 @@ export class Login {
   carregando = false;
 
   entrar(): void {
+    if (this.carregando) return;
     if (!this.email.trim() || !this.senha) {
       this.erro = 'Informe seu e-mail e sua senha.';
       return;
@@ -28,13 +31,13 @@ export class Login {
     this.carregando = true;
     this.erro = '';
 
-    this.auth.login(this.email.trim(), this.senha).subscribe({
+    this.auth.login(this.email.trim(), this.senha).pipe(
+      finalize(() => { this.carregando = false; this.cdr.detectChanges(); }),
+    ).subscribe({
       next: () => {
-        this.carregando = false;
         void this.router.navigate(['/dashboard']);
       },
       error: () => {
-        this.carregando = false;
         this.erro = 'E-mail ou senha inválidos. Verifique os dados e tente novamente.';
       },
     });

@@ -1,0 +1,223 @@
+<header class="pagina-cabecalho sb-anim sb-anim--1">
+  <p>Acervo</p>
+  <h1>Livros</h1>
+  <p>Cadastre, consulte e acompanhe os exemplares da SpringBook.</p>
+</header>
+
+@if (erro) {
+  <div class="erro" role="alert">{{ erro }}</div>
+}
+@if (sucesso) {
+  <p role="status"><span class="badge badge--ok">{{ sucesso }}</span></p>
+}
+
+@if (auth.isAdmin()) {
+  <section class="card sb-anim sb-anim--2">
+    <h2>{{ editandoId !== null ? 'Editar livro' : 'Cadastrar livro' }}</h2>
+    <p>Preencha os dados do exemplar. Campos marcados com * sao obrigatorios.</p>
+
+    <form (ngSubmit)="salvar()" #formLivro="ngForm">
+      <div class="cards">
+        <div class="campo">
+          <label for="livro-titulo">Título *</label>
+          <input id="livro-titulo" name="titulo" [(ngModel)]="formulario.titulo"
+                 maxlength="200" required placeholder="Ex.: Dom Casmurro" />
+        </div>
+        <div class="campo">
+          <label for="livro-autor">Autor *</label>
+          <input id="livro-autor" name="autor" [(ngModel)]="formulario.autor"
+                 maxlength="150" required placeholder="Ex.: Machado de Assis" />
+        </div>
+        <div class="campo">
+          <label for="livro-isbn">ISBN</label>
+          <input id="livro-isbn" name="isbn" [(ngModel)]="formulario.isbn"
+                 (input)="mascararIsbn($event)" maxlength="20" placeholder="ISBN do exemplar" />
+        </div>
+        <div class="campo">
+          <label for="livro-editora">Editora</label>
+          <input id="livro-editora" name="editora" [(ngModel)]="formulario.editora"
+                 maxlength="150" placeholder="Nome da editora" />
+        </div>
+        <div class="campo">
+          <label for="livro-ano">Ano de publicação</label>
+          <input id="livro-ano" name="ano" [(ngModel)]="formulario.ano"
+                 type="number" min="1450" max="2100" step="1" />
+        </div>
+        <div class="campo">
+          <label for="livro-categoria">Categoria *</label>
+          <select id="livro-categoria" name="categoriaId" [(ngModel)]="formulario.categoriaId" required>
+            <option [ngValue]="null">Selecione uma categoria</option>
+            @for (categoria of categorias; track categoria.id) {
+              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+            }
+          </select>
+          @if (erroCategorias) { <small class="erro">{{ erroCategorias }}</small> }
+          @if (!carregandoCategorias && categorias.length === 0) {
+            <small>Cadastre uma categoria antes de cadastrar livros.</small>
+          }
+        </div>
+        <div class="campo">
+          <label for="livro-preco">Preço (R$) *</label>
+          <input id="livro-preco" name="preco" [(ngModel)]="formulario.preco"
+                 type="number" min="0.01" step="0.01" required placeholder="Ex.: 29,90" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="livro-descricao">Descrição</label>
+        <textarea id="livro-descricao" name="descricao" [(ngModel)]="formulario.descricao"
+                  maxlength="2000" rows="3" placeholder="Detalhes e estado de conservação"></textarea>
+      </div>
+
+      @if (editandoId; as idEditado) {
+        <div class="capa-edicao">
+          <div class="capa-card" [class.capa-card--vazia]="capasAusentes.has(idEditado)">
+            @if (!capasAusentes.has(idEditado)) {
+              <img class="capa-card__imagem" [src]="urlCapa(idEditado)"
+                   [alt]="'Capa atual de ' + formulario.titulo"
+                   (error)="marcarCapaAusente(idEditado)" />
+            } @else {
+              <div class="capa-card__vazia">
+                <span class="material-symbols-rounded">image</span>
+                <small>Sem imagem</small>
+              </div>
+            }
+          </div>
+
+          <div class="capa-edicao__acoes">
+            <span class="capa-acoes__titulo">Capa do livro (JPG, PNG ou WebP, até 1 MB)</span>
+            <input #campoCapaEdicao [id]="'capa-edicao-' + idEditado" class="capa-input" type="file"
+                   accept="image/jpeg,image/png,image/webp"
+                   (change)="selecionarCapa(idEditado, $event)"
+                   [disabled]="enviandoCapaId !== null || removendoCapaId !== null || salvando" />
+            <label class="btn btn--primary" [attr.for]="'capa-edicao-' + idEditado">Escolher arquivo</label>
+            @if (arquivosCapa[idEditado]; as arquivo) {
+              <small class="capa-arquivo">{{ arquivo.name }}</small>
+            }
+            <div>
+              <button class="btn btn--primary" type="button"
+                      (click)="enviarCapa(idEditado, campoCapaEdicao)"
+                      [disabled]="!arquivosCapa[idEditado] || enviandoCapaId !== null
+                                  || removendoCapaId !== null || salvando">
+                Salvar capa
+              </button>
+              <button class="btn btn--danger" type="button"
+                      (click)="removerCapa(idEditado, campoCapaEdicao)"
+                      [disabled]="capasAusentes.has(idEditado) || enviandoCapaId !== null
+                                  || removendoCapaId !== null || salvando">
+                Remover capa
+              </button>
+            </div>
+            <small>Escolha uma imagem e clique em “Salvar capa”, ou remova a capa atual.</small>
+          </div>
+        </div>
+      }
+
+      <p>Livro novo: <span class="badge badge--ok">DISPONÍVEL</span>. O status mudará por venda ou reserva.</p>
+
+      <div class="acoes-salvar">
+        <button class="btn btn--primary" type="submit" [disabled]="salvando || !formLivro.valid">
+          Salvar
+        </button>
+        @if (editandoId !== null) {
+          <button class="btn btn--ghost" type="button" (click)="cancelar()" [disabled]="salvando">Cancelar edição</button>
+        }
+      </div>
+    </form>
+  </section>
+}
+
+<section class="secao-lista sb-anim sb-anim--3">
+  <div class="lista-cabecalho">
+    <h2>Livros cadastrados</h2>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" type="button" (click)="carregar()" [disabled]="carregando">
+        Atualizar lista
+      </button>
+    }
+  </div>
+
+  <div class="tabela-wrap">
+    <table mat-table [dataSource]="livros" class="tabela">
+      <ng-container matColumnDef="titulo">
+        <th mat-header-cell *matHeaderCellDef>Título</th>
+        <td mat-cell *matCellDef="let livro">
+          <div style="display:flex; align-items:center; gap:0.85rem">
+            <div class="capa-card" [class.capa-card--vazia]="capasAusentes.has(livro.id)">
+              @if (!capasAusentes.has(livro.id)) {
+                <img class="capa-card__imagem" [src]="urlCapa(livro.id)"
+                     [alt]="'Capa do livro ' + livro.titulo"
+                     (error)="marcarCapaAusente(livro.id)" />
+              } @else {
+                <div class="capa-card__vazia">
+                  <span class="material-symbols-rounded">image</span>
+                  <small>Sem imagem</small>
+                </div>
+              }
+            </div>
+            <strong>{{ livro.titulo }}</strong>
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="autor">
+        <th mat-header-cell *matHeaderCellDef>Autor</th>
+        <td mat-cell *matCellDef="let livro">{{ livro.autor }}</td>
+      </ng-container>
+      <ng-container matColumnDef="categoria">
+        <th mat-header-cell *matHeaderCellDef>Categoria</th>
+        <td mat-cell *matCellDef="let livro">{{ livro.categoriaNome || ('ID ' + livro.categoriaId) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="preco">
+        <th mat-header-cell *matHeaderCellDef>Preço</th>
+        <td mat-cell *matCellDef="let livro">{{ formatarPreco(livro.preco) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let livro">
+          <span class="badge" [class.badge--ok]="livro.status === 'DISPONIVEL'"
+                [class.badge--alert]="livro.status === 'VENDIDO'">
+            {{ livro.status }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let livro">
+          @if (auth.isAdmin()) {
+            <button class="btn btn--ghost" type="button" (click)="editar(livro)">Editar</button>
+            @if (livro.status === 'DISPONIVEL') {
+              <button class="btn btn--danger" type="button" (click)="pedirExclusao(livro)"
+                      [disabled]="excluindoId !== null || livro.possuiHistoricoVendas"
+                      [title]="livro.possuiHistoricoVendas
+                        ? 'Não é possível excluir: este livro possui histórico de vendas'
+                        : 'Excluir livro'">
+                Excluir
+              </button>
+              @if (livro.possuiHistoricoVendas) {
+                <small class="observacao-exclusao">Com histórico de venda — não é possível excluir</small>
+              }
+            }
+          } @else {
+            <span>Consulta</span>
+          }
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+      <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+    </table>
+    @if (!carregando && livros.length === 0) {
+      <div class="vazio">Nenhum livro cadastrado ainda.</div>
+    }
+  </div>
+</section>
+
+@if (confirmacaoExclusao; as livro) {
+  <app-confirm-dialog
+    titulo="Remover livro"
+    [mensagem]="'Deseja remover permanentemente o exemplar ' + livro.titulo + '?'"
+    confirmarTexto="Remover"
+    [perigo]="true"
+    [processando]="excluindoId !== null"
+    (confirmado)="confirmarExclusao()"
+    (cancelado)="cancelarExclusao()" />
+}

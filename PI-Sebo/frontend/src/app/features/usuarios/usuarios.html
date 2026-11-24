@@ -4,45 +4,132 @@
   <p>Contas com acesso ao sistema e seus respectivos perfis.</p>
 </header>
 
-@if (erro) {
-  <div class="erro" role="alert">{{ erro }}</div>
+@if (erro) { <div class="erro" role="alert">{{ erro }}</div> }
+@if (sucesso) {
+  <p role="status" class="aviso-sucesso">
+    <span class="badge badge--ok">{{ sucesso }}</span>
+  </p>
 }
 
-<div class="tabela-wrap sb-anim sb-anim--2">
-  <table mat-table [dataSource]="usuarios" class="tabela">
-    <ng-container matColumnDef="nome">
-      <th mat-header-cell *matHeaderCellDef>Nome</th>
-      <td mat-cell *matCellDef="let u"><strong>{{ u.nome }}</strong></td>
-    </ng-container>
+<section class="card sb-anim sb-anim--2">
+  <h2>
+    {{ editandoId === null ? 'Cadastrar usuário' : 'Editar usuário' }}
+    </h2>
+  <p>Perfis válidos: ADMIN e FUNCIONÁRIO. O último ADMIN não pode ser excluído.</p>
 
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef>E-mail</th>
-      <td mat-cell *matCellDef="let u">{{ u.email }}</td>
-    </ng-container>
+  <form (ngSubmit)="salvar()" #formUsuario="ngForm">
+    <div class="cards">
+      <div class="campo">
+        <label for="usu-nome">Nome *</label>
+        <input id="usu-nome" name="nome" [(ngModel)]="formulario.nome" required maxlength="100"
+               [disabled]="carregandoEdicao || salvando" />
+      </div>
+      <div class="campo">
+        <label for="usu-email">E-mail *</label>
+        <input id="usu-email" name="email" [(ngModel)]="formulario.email" type="email"
+               required maxlength="100" [disabled]="carregandoEdicao || salvando" />
+      </div>
+      <div class="campo">
+        <label for="usu-tipo">Perfil *</label>
+        <select id="usu-tipo" name="tipo" [(ngModel)]="formulario.tipo" required
+                [disabled]="carregandoEdicao || salvando">
+          <option value="FUNCIONARIO">Funcionário</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="usu-senha">
+          {{ editandoId === null ? 'Senha *' : 'Nova senha (deixe em branco para manter)' }}
+        </label>
+        <input id="usu-senha" name="senha" [(ngModel)]="formulario.senha" type="password"
+               [required]="editandoId === null" minlength="6" maxlength="100"
+               [disabled]="carregandoEdicao || salvando" />
+      </div>
+    </div>
 
-    <ng-container matColumnDef="tipo">
-      <th mat-header-cell *matHeaderCellDef>Perfil</th>
-      <td mat-cell *matCellDef="let u">
-        <span class="badge" [class.badge--alert]="u.tipo === 'ADMIN'">
-          {{ u.tipo === 'ADMIN' ? 'Administrador' : 'Funcionário' }}
-        </span>
-      </td>
-    </ng-container>
+    <div class="acoes-form">
+      <button class="btn btn--primary" type="submit" [disabled]="salvando || carregandoEdicao || !formUsuario.valid">
+        Salvar
+      </button>
+      @if (editandoId !== null) {
+        <button class="btn btn--ghost" type="button" (click)="cancelar()" [disabled]="salvando || carregandoEdicao">
+          Cancelar edição
+        </button>
+      }
+    </div>
+  </form>
+</section>
 
-    <ng-container matColumnDef="ativo">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let u">
-        <span class="badge" [class.badge--ok]="u.ativo" [class.badge--off]="!u.ativo">
-          {{ u.ativo ? 'Ativo' : 'Inativo' }}
-        </span>
-      </td>
-    </ng-container>
+<section class="secao-lista sb-anim sb-anim--3">
+  <div class="lista-cabecalho">
+    <h2>Usuários cadastrados</h2>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" type="button" (click)="carregar()" [disabled]="carregando">
+        Atualizar lista
+      </button>
+    }
+  </div>
 
-    <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-    <tr mat-row *matRowDef="let row; columns: colunas"></tr>
-  </table>
+  <div class="tabela-wrap">
+    <table mat-table [dataSource]="usuarios" class="tabela">
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let u"><strong>{{ u.nome }}</strong></td>
+      </ng-container>
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>E-mail</th>
+        <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+      </ng-container>
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef>Perfil</th>
+        <td mat-cell *matCellDef="let u">
+          <span class="badge" [class.badge--admin]="u.tipo === 'ADMIN'"
+                [class.badge--funcionario]="u.tipo !== 'ADMIN'">
+            {{ u.tipo === 'ADMIN' ? 'Administrador' : 'Funcionário' }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="ativo">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let u">
+          <span class="badge" [class.badge--ok]="u.ativo" [class.badge--off]="!u.ativo">
+            {{ u.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let u">
+          <div class="acoes-tabela">
+            <button class="btn btn--ghost" type="button" (click)="editar(u)"
+                    [disabled]="carregandoEdicao || salvando || excluindoId !== null">
+              Editar
+            </button>
+            <button class="btn btn--danger" type="button" (click)="pedirExclusao(u)"
+                    [disabled]="excluindoId !== null || carregandoEdicao || salvando">
+              Excluir
+            </button>
+          </div>
+        </td>
+      </ng-container>
 
-  @if (!carregando && usuarios.length === 0) {
-    <div class="vazio">Nenhum usuário cadastrado ainda.</div>
-  }
-</div>
+      <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+      <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+    </table>
+
+    @if (!carregando && usuarios.length === 0) {
+      <div class="vazio">Nenhum usuário cadastrado ainda.</div>
+    }
+  </div>
+</section>
+
+@if (confirmacaoExclusao; as usuario) {
+  <app-confirm-dialog
+    titulo="Remover usuário"
+    [mensagem]="'Deseja remover o usuário ' + usuario.nome + '?'"
+    confirmarTexto="Remover"
+    [perigo]="true"
+    [processando]="excluindoId !== null"
+    (confirmado)="confirmarExclusao()"
+    (cancelado)="cancelarExclusao()" />
+}

@@ -6,9 +6,9 @@ Este documento fixa os acordos mínimos para que as três pessoas trabalhem no *
 
 | Projeto | Caminho |
 |---|---|
-| Backend (Spring Boot — já existente) | `C:\Users\henri\Downloads\livros\livros` |
-| Frontend (Angular — criado nesta etapa) | `C:\Users\henri\Downloads\livros\PI-Sebo\frontend` |
-| Contrato | `C:\Users\henri\Downloads\livros\PI-Sebo\CONTRATO-INTEGRACAO.md` |
+| Backend (Spring Boot) | `livros/` (na raiz do grupo) |
+| Frontend (Angular) | `PI-Sebo/frontend/` |
+| Contrato | `PI-Sebo/CONTRATO-INTEGRACAO.md` |
 
 > O backend foi mantido no lugar, mas recebeu um ajuste de segurança: `/h2-console/**` agora exige perfil `ADMIN` e o console é desabilitado no perfil `prod`.
 
@@ -98,7 +98,6 @@ Sugestão inicial:
 - `AuthService` expõe `usuario`, `logado` e `isAdmin` (signals). Use para controle visual de permissão.
 - Rotas são de propriedade da Pessoa 1. Colegas entregam o componente e informam o caminho do arquivo; a Pessoa 1 troca o placeholder pela rota real.
 - Tokens visuais (cores, fontes, botões, badges, tabelas) estão em `src/styles.css` — não redefinir localmente.
-- **Toda a parte visual é de propriedade da Pessoa 1.** Colegas entregam apenas `.ts` + `.html` usando as classes globais: `.cards`, `.card`, `.btn`, `.badge`, `.campo`, `.tabela`, `.tabela-wrap`, `.vazio`, `.erro`, `.sb-anim--1..6`. Não criar nem editar `.css`, `styles.css`, `index.html`, `angular.json` nem `layout/`. Isso fica travado no `.github/CODEOWNERS`.
 
 ## 7. Decisões fixadas
 
@@ -113,16 +112,19 @@ Sugestão inicial:
 ### Já executados
 
 - `/h2-console/**` restrito a `ADMIN` no `SecurityConfig`.
-- `application-prod.properties` desabilita o console H2 em produção.
+- `application-prod.properties` desabilita o console H2 e o seed em produção.
+- `DataSeeder` cria o ADMIN inicial (`admin@sebolivros.com` / `admin123`) quando não há ADMIN ativo.
 
 ### Ainda pendentes
 
-Estes pontos foram identificados na análise e **não** foram alterados até aqui:
+Nenhum item bloqueante. Os pontos antes pendentes foram concluídos:
 
-1. `@CrossOrigin(..., allowCredentials = "true")` — necessário se o front chamar `http://localhost:8080/api` diretamente. Hoje o proxy de dev resolve isso.
-2. Endpoint `GET /api/me` — para restaurar o usuário logado após F5 sem depender de `sessionStorage`.
-3. `@ControllerAdvice` — padronizar corpo de erros (401/403/404/409).
-4. `@Valid` + anotações nos DTOs e uso de `existsByEmail` / `existsByDocumento`.
+1. CORS centralizado no `SecurityConfig` (origem `http://localhost:4200`, `allowCredentials=true`).
+2. `GET /api/me` valida a sessão no bootstrap e via `authGuard`.
+3. `@RestControllerAdvice` padroniza erros com `{ status, erro, mensagem, campos }`.
+4. `@Valid` + Bean Validation em todos os DTOs de escrita; e-mails e documentos duplicados retornam `409`.
+
+Regras adicionais já vigentes: último `ADMIN` não pode ser excluído; IE somente para SP/MG/RJ; exclusão de livro bloqueada quando existe histórico de vendas.
 
 ## 9. Checklist de entrega de cada módulo
 

@@ -1,19 +1,27 @@
-
 package com.sebo.livros.controller;
 
 import com.sebo.livros.dto.UsuarioCadastroDTO;
 import com.sebo.livros.dto.UsuarioRespostaDTO;
 import com.sebo.livros.entity.Usuario;
 import com.sebo.livros.service.UsuarioService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:4200")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -26,74 +34,50 @@ public class UsuarioController {
     public List<UsuarioRespostaDTO> listarTodos() {
         return usuarioService.listarTodos().stream()
                 .map(this::converterParaDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioRespostaDTO> buscarPorId(
-            @PathVariable Long id) {
-
-        return usuarioService.buscarPorId(id)
-                .map(usuario -> ResponseEntity.ok(converterParaDTO(usuario)))
-                .orElse(ResponseEntity.notFound().build());
+    public UsuarioRespostaDTO buscarPorId(@PathVariable Long id) {
+        return converterParaDTO(usuarioService.buscarPorId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario nao encontrado")));
     }
 
     @PostMapping
-    public UsuarioRespostaDTO cadastrar(
-            @RequestBody UsuarioCadastroDTO dto) {
-
+    @ResponseStatus(HttpStatus.CREATED)
+    public UsuarioRespostaDTO cadastrar(@Valid @RequestBody UsuarioCadastroDTO dto) {
         Usuario usuario = new Usuario();
-
-        usuario.setNome(dto.getNome());
-        usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
-        usuario.setTipo(dto.getTipo());
-
+        usuario.setNome(dto.nome());
+        usuario.setEmail(dto.email());
+        usuario.setSenha(dto.senha());
+        usuario.setTipo(dto.tipo());
         return converterParaDTO(usuarioService.salvar(usuario));
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioRespostaDTO> atualizar(
-            @PathVariable Long id,
-            @RequestBody UsuarioCadastroDTO dto) {
-
-        return usuarioService.buscarPorId(id)
-                .map(usuario -> {
-                    usuario.setNome(dto.getNome());
-                    usuario.setEmail(dto.getEmail());
-                    usuario.setTipo(dto.getTipo());
-
-                    Usuario atualizado = usuarioService.atualizar(
-                            usuario,
-                            dto.getSenha()
-                    );
-
-                    return ResponseEntity.ok(converterParaDTO(atualizado));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public UsuarioRespostaDTO atualizar(@PathVariable Long id,
+                                        @Valid @RequestBody UsuarioCadastroDTO dto) {
+        Usuario usuario = usuarioService.buscarPorId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario nao encontrado"));
+        usuario.setNome(dto.nome());
+        usuario.setEmail(dto.email());
+        usuario.setTipo(dto.tipo());
+        return converterParaDTO(usuarioService.atualizar(usuario, dto.senha()));
     }
 
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (usuarioService.buscarPorId(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable Long id) {
         usuarioService.excluir(id);
-        return ResponseEntity.noContent().build();
     }
 
     private UsuarioRespostaDTO converterParaDTO(Usuario usuario) {
         UsuarioRespostaDTO dto = new UsuarioRespostaDTO();
-
         dto.setId(usuario.getId());
         dto.setNome(usuario.getNome());
         dto.setEmail(usuario.getEmail());
         dto.setTipo(usuario.getTipo());
         dto.setAtivo(usuario.getAtivo());
-
         return dto;
     }
 }

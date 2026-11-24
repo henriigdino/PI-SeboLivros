@@ -1,11 +1,12 @@
-
 package com.sebo.livros.dto;
 
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-@Data
-public class LoginDTO {
+public record LoginDTO(
+        @NotBlank(message = "Informe o e-mail")
+        @Email(message = "E-mail invalido")
+        String email,
 
-    private String email;
-    private String senha;
-}
+        @NotBlank(message = "Informe a senha")
+        String senha) { }

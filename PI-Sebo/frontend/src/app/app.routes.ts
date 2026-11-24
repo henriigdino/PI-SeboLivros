@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -38,40 +38,27 @@ export const routes: Routes = [
       {
         path: 'categorias',
         title: 'Categorias — SpringBook',
-        loadComponent: () => import('./features/em-breve/em-breve').then((m) => m.EmBreve),
-        data: {
-          titulo: 'Categorias',
-          descricao: 'Organize o acervo por gênero. Este módulo estará disponível em breve.',
-        },
+        loadComponent: () => import('./features/categorias/categorias').then((m) => m.Categorias),
       },
       {
         path: 'livros',
         title: 'Livros — SpringBook',
-        loadComponent: () => import('./features/em-breve/em-breve').then((m) => m.EmBreve),
-        data: {
-          titulo: 'Livros',
-          descricao: 'Cadastre e acompanhe cada exemplar do acervo. Disponível em breve.',
-        },
+        loadComponent: () => import('./features/livros/livros').then((m) => m.Livros),
       },
       {
         path: 'clientes',
         title: 'Clientes — SpringBook',
-        loadComponent: () => import('./features/em-breve/em-breve').then((m) => m.EmBreve),
-        data: {
-          titulo: 'Clientes',
-          descricao: 'Gerencie os leitores da SpringBook. Disponível em breve.',
-        },
+        loadComponent: () => import('./features/clientes/clientes').then((m) => m.Clientes),
       },
       {
         path: 'vendas',
         title: 'Vendas — SpringBook',
-        loadComponent: () => import('./features/em-breve/em-breve').then((m) => m.EmBreve),
-        data: {
-          titulo: 'Vendas',
-          descricao: 'Registre vendas e mantenha o acervo atualizado. Disponível em breve.',
-        },
+        loadComponent: () => import('./features/vendas/vendas').then((m) => m.Vendas),
       },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },
 ];
+
+
+

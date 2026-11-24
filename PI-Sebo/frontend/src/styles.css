@@ -6,9 +6,9 @@
 
 :root {
   /* Marca */
-  --sebo-paper: #faf7f0;
-  --sebo-surface: #fffdf8;
-  --sebo-surface-2: #f4efe5;
+  --sebo-paper: #ffffff;
+  --sebo-surface: #ffffff;
+  --sebo-surface-2: #f2f7f3;
   --sebo-ink: #2b2723;
   --sebo-ink-soft: #5f5a52;
   --sebo-moss: #2f8f5b;
@@ -62,8 +62,8 @@ html, body {
 
 body {
   background:
-    radial-gradient(circle at 12% 8%, rgba(176, 141, 87, 0.07), transparent 32%),
-    radial-gradient(circle at 88% 92%, rgba(47, 143, 91, 0.07), transparent 34%),
+    radial-gradient(circle at 10% 0%, rgba(47, 143, 91, 0.06), transparent 30%),
+    radial-gradient(circle at 90% 100%, rgba(47, 143, 91, 0.05), transparent 30%),
     var(--sebo-paper);
   color: var(--sebo-ink);
   font-family: var(--font-sans);
@@ -149,6 +149,7 @@ a { color: var(--sebo-moss-dark); }
 .sb-anim--4 { animation-delay: 0.32s; }
 .sb-anim--5 { animation-delay: 0.40s; }
 .sb-anim--6 { animation-delay: 0.48s; }
+.sb-anim--7 { animation-delay: 0.56s; }
 
 .sb-traco {
   transform-origin: left center;
@@ -196,6 +197,8 @@ a { color: var(--sebo-moss-dark); }
 .card p { color: var(--sebo-ink-soft); font-size: 0.9rem; margin-bottom: 0; }
 
 .btn {
+  --btn-glow: rgba(47, 143, 91, 0.36);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -208,33 +211,75 @@ a { color: var(--sebo-moss-dark); }
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.05s ease, border-color 0.15s ease;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease,
+    transform 0.12s ease,
+    border-color 0.2s ease;
+}
+
+/* Brilho degradê compartilhado por todos os botões de interação */
+.btn:not(:disabled):hover {
+  box-shadow: 0 0 0 3px var(--btn-glow), 0 10px 26px -6px var(--btn-glow);
+  filter: brightness(1.05);
 }
 
 .btn:active { transform: translateY(1px); }
-.btn:focus-visible { outline: 3px solid rgba(47, 143, 91, 0.35); outline-offset: 2px; }
+.btn:focus-visible { outline: 3px solid var(--btn-glow); outline-offset: 2px; }
 
 .btn--primary {
+  --btn-glow: rgba(47, 143, 91, 0.4);
   background: var(--sebo-moss);
   color: #fff;
 }
-.btn--primary:hover { background: var(--sebo-moss-dark); }
+.btn--primary:not(:disabled):hover {
+  background: linear-gradient(120deg, #3aad70 0%, #2f8f5b 52%, #1f7a4a 100%);
+  border-color: transparent;
+}
 
 .btn--ghost {
+  --btn-glow: rgba(43, 39, 35, 0.16);
   background: transparent;
   color: var(--sebo-ink);
   border-color: var(--sebo-border);
 }
-.btn--ghost:hover { background: var(--sebo-surface-2); }
+.btn--ghost:not(:disabled):hover { background: var(--sebo-surface-2); }
 
 .btn--danger {
+  --btn-glow: rgba(163, 50, 46, 0.4);
   background: transparent;
   color: var(--sebo-wine);
   border-color: #e2c3be;
 }
-.btn--danger:hover { background: #f9eae7; }
+.btn--danger:not(:disabled):hover {
+  background: linear-gradient(120deg, #c2413c 0%, #a3322e 55%, #7c211e 100%);
+  color: #fff;
+  border-color: transparent;
+}
 
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Padrão único para todas as telas com lista:
+   título à esquerda, "Atualizar lista" à direita e espaço entre os cards. */
+.secao-lista { margin-top: 2.25rem; }
+
+.lista-cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+.lista-cabecalho .btn { margin-bottom: 0.65rem; }
+
+.cep-linha { display: flex; align-items: center; gap: 0.5rem; }
+.aviso-endereco { display: block; margin-top: 0.35rem; color: var(--sebo-moss); font-weight: 600; }
+
+/* Botões de ação nunca ficam colados (tabelas e formulários) */
+td .btn + .btn,
+form .btn + .btn { margin-left: 0.5rem; }
 
 .badge {
   display: inline-flex;
@@ -243,14 +288,40 @@ a { color: var(--sebo-moss-dark); }
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 600;
-  background: #e8e8dc;
+  font-weight: 700;
   color: #3c4331;
+  background: linear-gradient(135deg, #f2f2e8 0%, #dfe4d4 100%);
+  border: 1px solid rgba(60, 67, 49, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
-.badge--ok { background: #d9f2e3; color: #174b2d; }
-.badge--off { background: #eee9e0; color: #6a6358; }
-.badge--alert { background: #f3ded9; color: #6b2b23; }
+.badge--ok {
+  background: linear-gradient(135deg, #c4f2d7 0%, #7ed6a5 52%, #3ea56d 100%);
+  color: #113d25;
+  border-color: rgba(30, 110, 68, 0.2);
+}
+.badge--off {
+  background: linear-gradient(135deg, #f6f2e9 0%, #e3ddd0 100%);
+  color: #5f594e;
+  border-color: rgba(95, 89, 78, 0.14);
+}
+.badge--alert {
+  background: linear-gradient(135deg, #f8cec7 0%, #e08b7e 55%, #b84336 100%);
+  color: #fff;
+  border-color: rgba(140, 35, 26, 0.2);
+}
+
+/* Perfis: ADMIN amarelo, FUNCIONÁRIO rosa */
+.badge--admin {
+  background: linear-gradient(135deg, #ffe98a 0%, #f5c518 52%, #d99a00 100%);
+  color: #4a3400;
+  border-color: rgba(140, 96, 0, 0.25);
+}
+.badge--funcionario {
+  background: linear-gradient(135deg, #ffd6e8 0%, #f48fb1 52%, #e36495 100%);
+  color: #6b1438;
+  border-color: rgba(150, 30, 80, 0.2);
+}
 
 /* ---------- Formulários ---------- */
 
@@ -304,24 +375,41 @@ table.tabela { width: 100%; border-collapse: collapse; }
 
 .tabela th {
   text-align: left;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--sebo-ink-soft);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--sebo-ink);
   background: var(--sebo-surface-2);
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--sebo-border);
+  padding: 0.95rem 1rem;
+  border-bottom: 2px solid var(--sebo-border);
+  border-right: 1px solid var(--sebo-border);
   white-space: nowrap;
 }
 
 .tabela td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid #f0ebe1;
-  font-size: 0.9rem;
+  border-bottom: 1px solid var(--sebo-border);
+  border-right: 1px solid var(--sebo-border);
+  font-size: 0.92rem;
+  position: relative;
 }
+
+.tabela th:last-child,
+.tabela td:last-child { border-right: none; }
 
 .tabela tr:last-child td { border-bottom: none; }
 .tabela tbody tr:hover { background: #fbfdfb; }
+
+.observacao-exclusao {
+  display: block;
+  margin-top: 0.4rem;
+  max-width: 220px;
+  color: var(--sebo-ink-soft);
+  font-size: 0.74rem;
+  line-height: 1.3;
+  white-space: normal;
+}
 
 .vazio {
   padding: 3rem 1rem;
@@ -335,3 +423,132 @@ table.tabela { width: 100%; border-collapse: collapse; }
   h1 { font-size: 1.6rem; }
   .cards { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Barra de atualização (verde = adicionar/salvar, vermelho = remover)
+   ============================================================ */
+
+.barra-atualizacao {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  overflow: hidden;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.barra-atualizacao__preenchimento {
+  height: 100%;
+  width: 38%;
+  border-radius: 999px;
+  animation: sb-barra-andamento 1.1s ease-in-out infinite;
+}
+
+.barra-atualizacao--sucesso .barra-atualizacao__preenchimento {
+  background: linear-gradient(90deg, #8ce0b2, var(--sebo-moss), #17663c);
+}
+
+.barra-atualizacao--erro .barra-atualizacao__preenchimento {
+  background: linear-gradient(90deg, #f6b3a8, #c0392b, #7d1d14);
+}
+
+@keyframes sb-barra-andamento {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+
+/* ---------- Capa dos livros em destaque ---------- */
+
+.capa-card {
+  width: 72px;
+  height: 104px;
+  border-radius: 8px;
+  border: 2px solid var(--sebo-moss);
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(47, 143, 91, 0.20);
+  overflow: hidden;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.capa-card__imagem {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.capa-card--vazia {
+  border-style: dashed;
+  border-color: var(--sebo-border);
+  background: var(--sebo-surface-2);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.15rem;
+  color: var(--sebo-ink-soft);
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.capa-card--vazia .material-symbols-rounded { font-size: 26px; color: var(--sebo-bronze); }
+.capa-card--vazia small { font-size: 0.62rem; line-height: 1.1; }
+
+/* Seletor de arquivo com botão verde, igual ao restante da UI */
+.capa-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.capa-acoes__titulo {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sebo-ink-soft);
+}
+.capa-arquivo {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--sebo-ink-soft);
+}
+
+/* Capa dentro do formulário de edição do livro */
+.capa-edicao {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0 1.25rem;
+  padding: 1rem 1.15rem;
+  border: 1px dashed var(--sebo-border);
+  border-radius: 14px;
+  background: var(--sebo-surface-2);
+}
+.capa-edicao__acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+.capa-edicao__acoes input { max-width: 280px; }
+.capa-edicao__acoes small { color: var(--sebo-ink-soft); }
+
+/* Afasta "Salvar" do aviso de status do livro */
+.acoes-salvar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 1.25rem;
+}
+
+

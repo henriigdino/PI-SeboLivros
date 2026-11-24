@@ -4,49 +4,113 @@
   <p>Lista de quem abastece o acervo da SpringBook.</p>
 </header>
 
-@if (erro) {
-  <div class="erro" role="alert">{{ erro }}</div>
+@if (erro) { <div class="erro" role="alert">{{ erro }}</div> }
+@if (sucesso) { <p role="status"><span class="badge badge--ok">{{ sucesso }}</span></p> }
+
+@if (auth.isAdmin()) {
+<section class="card sb-anim sb-anim--2">
+  <h2>{{ editandoId === null ? 'Cadastrar fornecedor' : 'Editar fornecedor' }}</h2>
+  <p>Informe CPF ou CNPJ válido. Documento, e-mail e telefone repetidos são bloqueados.</p>
+  <form (ngSubmit)="salvar()" #formFornecedor="ngForm">
+    <div class="cards">
+      <div class="campo">
+        <label for="forn-nome">Nome / razão social *</label>
+        <input id="forn-nome" name="nome" [(ngModel)]="formulario.nome"
+               required maxlength="150" placeholder="Nome do fornecedor" />
+      </div>
+      <div class="campo">
+        <label for="forn-documento">CPF / CNPJ *</label>
+        <input id="forn-documento" name="documento" [(ngModel)]="formulario.documento"
+               (input)="mascararDocumento($event)" required maxlength="18"
+               placeholder="00.000.000/0001-00" />
+      </div>
+      <div class="campo">
+        <label for="forn-email">E-mail</label>
+        <input id="forn-email" name="email" [(ngModel)]="formulario.email" type="email" maxlength="100" />
+      </div>
+      <div class="campo">
+        <label for="forn-telefone">Telefone</label>
+        <input id="forn-telefone" name="telefone" [(ngModel)]="formulario.telefone" maxlength="11" placeholder="11999999999" />
+      </div>
+      <div class="campo">
+        <label for="forn-endereco">Endereço</label>
+        <input id="forn-endereco" name="endereco" [(ngModel)]="formulario.endereco" maxlength="150" />
+      </div>
+    </div>
+    <button class="btn btn--primary" type="submit" [disabled]="salvando || !formFornecedor.valid">
+      Salvar
+    </button>
+    @if (editandoId !== null) {
+      <button class="btn btn--ghost" type="button" (click)="cancelar()" [disabled]="salvando">
+        Cancelar edição
+      </button>
+    }
+  </form>
+</section>
 }
 
-<div class="tabela-wrap sb-anim sb-anim--2">
-  <table mat-table [dataSource]="fornecedores" class="tabela">
-    <ng-container matColumnDef="nome">
-      <th mat-header-cell *matHeaderCellDef>Nome</th>
-      <td mat-cell *matCellDef="let f"><strong>{{ f.nome }}</strong></td>
-    </ng-container>
+<section class="secao-lista sb-anim sb-anim--3">
+  <div class="lista-cabecalho">
+    <h2>Fornecedores cadastrados</h2>
+    @if (auth.isAdmin()) {
+      <button class="btn btn--primary" type="button" (click)="carregar()" [disabled]="carregando">
+        Atualizar lista
+      </button>
+    }
+  </div>
 
-    <ng-container matColumnDef="documento">
-      <th mat-header-cell *matHeaderCellDef>Documento</th>
-      <td mat-cell *matCellDef="let f">{{ f.documento }}</td>
-    </ng-container>
+  <div class="tabela-wrap">
+    <table mat-table [dataSource]="fornecedores" class="tabela">
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let f"><strong>{{ f.nome }}</strong></td>
+      </ng-container>
+      <ng-container matColumnDef="documento">
+        <th mat-header-cell *matHeaderCellDef>Documento</th>
+        <td mat-cell *matCellDef="let f">{{ f.documento }}</td>
+      </ng-container>
+      <ng-container matColumnDef="contato">
+        <th mat-header-cell *matHeaderCellDef>Contato</th>
+        <td mat-cell *matCellDef="let f">{{ contato(f) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="ativo">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let f">
+          <span class="badge" [class.badge--ok]="f.ativo" [class.badge--off]="!f.ativo">
+            {{ f.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let f">
+          @if (auth.isAdmin()) {
+            <button class="btn btn--ghost" type="button" (click)="editar(f)">Editar</button>
+            <button class="btn btn--danger" type="button" (click)="pedirExclusao(f)"
+                    [disabled]="excluindoId !== null">Excluir</button>
+          } @else {
+            Consulta
+          }
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="contato">
-      <th mat-header-cell *matHeaderCellDef>Contato</th>
-      <td mat-cell *matCellDef="let f">{{ contato(f) }}</td>
-    </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+      <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+    </table>
 
-    <ng-container matColumnDef="ativo">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let f">
-        <span class="badge" [class.badge--ok]="f.ativo" [class.badge--off]="!f.ativo">
-          {{ f.ativo ? 'Ativo' : 'Inativo' }}
-        </span>
-      </td>
-    </ng-container>
+    @if (!carregando && fornecedores.length === 0) {
+      <div class="vazio">Nenhum fornecedor cadastrado ainda.</div>
+    }
+  </div>
+</section>
 
-    <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-    <tr mat-row *matRowDef="let row; columns: colunas"></tr>
-  </table>
-
-  @if (!carregando && fornecedores.length === 0) {
-    <div class="vazio">Nenhum fornecedor cadastrado ainda.</div>
-  }
-</div>
-
-<p class="dica sb-anim sb-anim--4">
-  @if (auth.isAdmin()) {
-    Você pode gerenciar estes cadastros.
-  } @else {
-    Use esta tela para consultar e cadastrar fornecedores.
-  }
-</p>
+@if (confirmacaoExclusao; as fornecedor) {
+  <app-confirm-dialog
+    titulo="Remover fornecedor"
+    [mensagem]="'Deseja remover o fornecedor ' + fornecedor.nome + '?'"
+    confirmarTexto="Remover"
+    [perigo]="true"
+    [processando]="excluindoId !== null"
+    (confirmado)="confirmarExclusao()"
+    (cancelado)="cancelarExclusao()" />
+}
