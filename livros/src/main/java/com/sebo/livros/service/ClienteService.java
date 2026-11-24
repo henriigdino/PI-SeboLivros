@@ -57,7 +57,8 @@ public class ClienteService {
         if (!"FISICA".equals(tipoPessoa) && !"JURIDICA".equals(tipoPessoa)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de pessoa obrigatorio ou invalido");
         }
-        // CPF/CNPJ com digitos verificadores validos, independentemente do tipo de pessoa.
+        // Qualquer sequencia de 11 ou 14 digitos e aceita, independentemente do
+        // tipo de pessoa e dos digitos verificadores.
         if (!Documentos.documentoValido(documento)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF ou CNPJ invalido");
         }

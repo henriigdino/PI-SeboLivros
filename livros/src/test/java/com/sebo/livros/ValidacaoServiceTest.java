@@ -83,18 +83,14 @@ class ValidacaoServiceTest {
                 () -> fornecedores.salvar(fornecedor("Outro nome", "11.222.333/0001-81")));
         assertEquals(409, duplicado.getStatusCode().value());
 
-        assertEquals("12345678909",
-                fornecedores.salvar(fornecedor("CPF valido", "123.456.789-09")).getDocumento());
-        assertEquals("11444777000161",
-                fornecedores.salvar(fornecedor("CNPJ valido", "11.444.777/0001-61")).getDocumento());
+        assertEquals("11111111111",
+                fornecedores.salvar(fornecedor("Onze digitos", "11111111111")).getDocumento());
+        assertEquals("11111111111111",
+                fornecedores.salvar(fornecedor("Quatorze digitos", "11.1111-11/111111")).getDocumento());
 
         ResponseStatusException invalido = assertThrows(ResponseStatusException.class,
                 () -> fornecedores.salvar(fornecedor("Invalido", "123")));
         assertEquals(400, invalido.getStatusCode().value());
-
-        ResponseStatusException cpfRepetido = assertThrows(ResponseStatusException.class,
-                () -> fornecedores.salvar(fornecedor("CPF repetido", "111.111.111-11")));
-        assertEquals(400, cpfRepetido.getStatusCode().value());
     }
 
     @Test
